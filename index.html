@@ -4,6 +4,32 @@
         <meta charset=utf-8 />
         <title>EON Maps</title>
         <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+        <!--<style>
+            body {
+                margin: 0;
+                /*padding: 0px 100px;*/
+            }
+            .map {
+                width: 100%;
+                height: 500px;
+            }
+            .map, #chart {
+                margin-top: 60px;
+                margin-bottom: 40px;
+            }
+            p, iframe, h1,h2,h3,h4,h5,h6,p,.map {
+                margin: 20px 0px;
+            }
+            h1 {
+                margin-top: 0px;
+            }
+            .about p {
+                opacity: .7;
+            }
+            .about {
+                border-bottom: 1px solid #efefef;
+            }
+        </style>-->
         <style>
             body {
                 margin: 0;
@@ -16,14 +42,7 @@
                 width:100%;
             }
         </style>
-        <!--
-                <link href="/lib/mapbox.css" rel="stylesheet" />
-                <script src="/lib/mapbox.js"></script>
-        
-                <script src="../bower_components/pubnub/web/pubnub.min.js"></script>
-                <script src="../bower_components/subsub/subsub.js"></script>
-                <script src="../pubnub-mapbox.js"></script>
-        -->
+
         <script src="//twemoji.maxcdn.com/twemoji.min.js"></script>
         <script type="text/javascript" src="http://pubnub.github.io/eon/v/eon/0.0.9/eon.js"></script>
         <link type="text/css" rel="stylesheet" href="http://pubnub.github.io/eon/v/eon/0.0.9/eon.css" />
@@ -32,7 +51,34 @@
 <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>-->
     </head>
     <body>
-        <div id='map'></div>
+        <header>
+            <h1><i class="fa fa-twitter"></i> How is America feeling right now?</h1>
+            <p>This map shows the emotional "state" of each state at any given moment. Positive or negative sentiments are loosely determined based on an analysis of key words used in tweets. The realtime data comes from the <a href="https://twitter.com/pubnub" target="_blank">@PubNub</a> Data Stream Network and PubNub's out-of-the-box access to the live Twitter stream.
+            </p>
+        </header>
+        <section id="main">
+            <section id="map" class="map"></section>
+            <!-- <section class="tweet">
+                 <blockquote class="h-entry">
+                     <a class="button" role="button" title="Follow on Twitter" href="" target="_blank"><img src="images/twitter-button.png"></a>
+                     <div class="header">
+                         <div class="name"></div>
+                         <div class="screenname"></div>
+                     </div>
+ 
+                     <div class="text"></div>
+                     <div class="timestamp"></div>
+ 
+                     <div class="actions">
+                         <a class="reply" href="" target="_blank"><i class="fa fa-reply"></i></a>
+                         <a class="retweet" href="" target="_blank"><i class="fa fa-retweet"></i></a>
+                         <a class="favorite" href="" target="_blank"><i class="fa fa-star"></i></a>
+                     </div>
+                 </blockquote>
+                 <div class="emotion"></div>
+             </section>-->
+        </section>
+
         <script>
             function getNonZeroRandomNumber() {
                 var random = Math.floor(Math.random() * 199) - 99;
@@ -40,14 +86,21 @@
                     return getNonZeroRandomNumber();
                 return random;
             }
+
+            function d(a) {
+                return a.replace(/((https?|s?ftp|ssh)\:\/\/[^"\s\<\>]*[^.,;'">\:\s\<\>\)\]\!])/g, function (a) {
+                    return'<a href="' + a + '" >' + a + "</a>"
+                })
+            }
         </script>
         <script>
             var channel = 'pubnub-mapbox' + getNonZeroRandomNumber();
             var new_point = [];
             var le;
-            var re_pos = /(:\)|:\)\)|:'\)|❤|)/;
+            var re_pos = /(:\)|:\)\)|:'\)|❤)/;
             var re_neg = /(:\(|:\(|:'\( )/;
-            var re_love = /❤/;
+            var re_love = /❤|\\ud83d\\udc8b /;
+            // http://apps.timwhitlock.info/emoji/tables/unicode
             var degree = 0;
             //var re = /(:\)|:'\))/;
 
@@ -63,7 +116,7 @@
                             iconSize: [34, 34]
                         })
                     });
-                    var popup = data[0];
+                    var popup = '<font face="Arial" size="5">' + twemoji.parse(d(data[0])) + "</font>";
                     marker.bindPopup(popup);
                     return marker;
                 },
@@ -96,18 +149,18 @@
                         if (msg.place !== null) {
                             new_p = msg.place.bounding_box.coordinates[0][0];
                             //console.log("point " + msg.place.bounding_box.coordinates[0][0]);
-                            
+
 
                             le = new_point.length;
                             var bp = Boolean(msg.text.match(re_pos));
                             var bn = Boolean(msg.text.match(re_neg));
                             if (bp || bn) {
-                                if (msg.lang === 'it'){
-                                    console.log("country " + msg.place.country + "message " + msg.text);
+                                //if (msg.lang === 'it'){
+                                console.log("country " + msg.place.country + " message " + msg.text);
                                 new_point = JSON.parse(JSON.stringify(new_point));
                                 new_point[le] = {
                                     degree: bp ? 1 : -1,
-                                    data: [msg.text,bp ? 1 : -1] ,
+                                    data: [msg.text, bp ? 1 : -1],
                                     latlng: [
                                         new_p[1],
                                         new_p[0]
@@ -117,7 +170,7 @@
 
                                 publish(new_point3);
                             }
-                            }
+                            //}
                         }
                     }
                 });
