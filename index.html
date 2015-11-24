@@ -94,7 +94,7 @@
                     channel: 'pubnub-twitter',
                     message: function (msg) {
                         //console.log(msg);
-                        if (msg.place != null) {
+                        if (msg.place !== null) {
                             new_p = msg.place.bounding_box.coordinates[0][0];
                             //console.log("point " + msg.place.bounding_box.coordinates[0][0]);
                             
