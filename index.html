@@ -45,7 +45,7 @@
             var channel = 'pubnub-mapbox' + getNonZeroRandomNumber();
             var new_point = [];
             var le;
-            var re_pos = /(:\)|:\)\)|:'\)|❤)/;
+            var re_pos = /(:\)|:\)\)|:'\)|❤|)/;
             var re_neg = /(:\(|:\(|:'\( )/;
             var re_love = /❤/;
             var degree = 0;
@@ -93,7 +93,7 @@
                 pn_tweet.subscribe({
                     channel: 'pubnub-twitter',
                     message: function (msg) {
-                        console.log(msg);
+                        //console.log(msg);
                         if (msg.place != null) {
                             new_p = msg.place.bounding_box.coordinates[0][0];
                             //console.log("point " + msg.place.bounding_box.coordinates[0][0]);
