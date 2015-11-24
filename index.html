@@ -45,22 +45,25 @@
             var channel = 'pubnub-mapbox' + getNonZeroRandomNumber();
             var new_point = [];
             var le;
-            var re = /(:\)|:\(|:'\))/;
+            var re_pos = /(:\)|:\)\)|:'\))/;
+            var re_neg = /(:\(|:\(|:'\(|❤ )/;
+            var re_love = /❤/;
+            var degree = 0;
             //var re = /(:\)|:'\))/;
-            
+
             eon.map({
                 id: 'map',
                 mb_token: 'pk.eyJ1IjoiaWFuamVubmluZ3MiLCJhIjoiZExwb0p5WSJ9.XLi48h-NOyJOCJuu1-h-Jg',
                 mb_id: 'ianjennings.l896mh2e',
                 channel: channel,
-                marker: function (latlng,data){
-                    var marker = new L.Marker(latlng,{
+                marker: function (latlng, data, degree) {
+                    var marker = new L.Marker(latlng, {
                         icon: L.icon({
-                            iconUrl: 'images/grinning-face.png',
-                            iconSize: [34,34]
+                            iconUrl: data[1] > 0 ? 'images/grinning-face.png' : 'images/angry-face.png',
+                            iconSize: [34, 34]
                         })
                     });
-                    var popup = data;
+                    var popup = data[0];
                     marker.bindPopup(popup);
                     return marker;
                 },
@@ -71,18 +74,6 @@
             });
 
             function connect() {
-
-                var me = {
-                    icon: {
-                        'marker-color': '#ce1126'
-                    }
-                };
-                var them = {
-                    icon: {
-                        'marker-color': '#29abe2'
-                    }
-                };
-
                 var point = {
                     latlng: [37.370375, -97.756138]
                             //latlng: [, ]
@@ -94,53 +85,42 @@
 
                 var pn_tweet = PUBNUB.init({
                     subscribe_key: 'sub-c-78806dd4-42a6-11e4-aed8-02ee2ddab7fe'
-                })
+                });
 
-                //var new_point = JSON.parse(JSON.stringify(point));
-
-
-                //               setInterval(function () {
-
-
-                var new_point2 = JSON.parse(JSON.stringify(point));
                 var new_point3 = JSON.parse(JSON.stringify(point));
                 var new_p;
-                /*
-                 new_point.latlng = [
-                 new_point.latlng[0] + (getNonZeroRandomNumber() * 0.1),
-                 new_point.latlng[1] + (getNonZeroRandomNumber() * 0.2)
-                 ];
-                 */
+
                 pn_tweet.subscribe({
                     channel: 'pubnub-twitter',
                     message: function (msg) {
                         console.log(msg);
-                        new_p = msg.place.bounding_box.coordinates[0][0];
-                        console.log("point " + msg.place.bounding_box.coordinates[0][0]);
-                        console.log("country " + msg.place.country);
-                        console.log("message " + msg.text);
+                        if (msg.place != null) {
+                            new_p = msg.place.bounding_box.coordinates[0][0];
+                            console.log("point " + msg.place.bounding_box.coordinates[0][0]);
+                            console.log("country " + msg.place.country);
+                            console.log("message " + msg.text);
 
-                        le = new_point.length;
-                        //if (msg.text.includes(":)") || msg.text.includes(":(") || msg.text.includes(":'(")){
-                        
-                        if (Boolean(msg.text.match(re))){
-                        //if (msg.text.includes(":)")){
-                            new_point = JSON.parse(JSON.stringify(new_point));
-                            new_point[le] = {
-                                //marker: new_point[le].marker,
-                                // 
-                                data: msg.text,
-                                latlng: [
-                                    new_p[1],
-                                    new_p[0]
-                                ]
-                            };
-                            new_point3 = JSON.parse(JSON.stringify(new_point));
+                            le = new_point.length;
+                            var bp = Boolean(msg.text.match(re_pos));
+                            var bn = Boolean(msg.text.match(re_neg));
+                            if (bp || bn) {
+                                //if (msg.text.includes(":)")){
+                                new_point = JSON.parse(JSON.stringify(new_point));
+                                new_point[le] = {
+                                    degree: bp ? 1 : -1,
+                                    data: [msg.text,bp ? 1 : -1] ,
+                                    latlng: [
+                                        new_p[1],
+                                        new_p[0]
+                                    ]
+                                };
+                                new_point3 = JSON.parse(JSON.stringify(new_point));
 
-                            publish(new_point3);
+                                publish(new_point3);
+                            }
+                            //}
                         }
-                    //}
-                    } 
+                    }
                 });
 
                 function publish(nn) {
