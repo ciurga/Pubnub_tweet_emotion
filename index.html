@@ -36,7 +36,7 @@
         <script>
             function getNonZeroRandomNumber() {
                 var random = Math.floor(Math.random() * 199) - 99;
-                if (random == 0)
+                if (random === 0)
                     return getNonZeroRandomNumber();
                 return random;
             }
@@ -69,14 +69,13 @@
                 },
                 connect: connect,
                 options: {
-                    zoomAnimation: false,
-                },
+                    zoomAnimation: false
+                }
             });
 
             function connect() {
                 var point = {
                     latlng: [37.370375, -97.756138]
-                            //latlng: [, ]
                 };
 
                 var pn = PUBNUB.init({
@@ -93,7 +92,7 @@
                 pn_tweet.subscribe({
                     channel: 'pubnub-twitter',
                     message: function (msg) {
-                        //console.log(msg);
+
                         if (msg.place !== null) {
                             new_p = msg.place.bounding_box.coordinates[0][0];
                             //console.log("point " + msg.place.bounding_box.coordinates[0][0]);
@@ -129,10 +128,6 @@
                         message: nn
                     });
                 }
-
-
-                //              }, 1000);
-
             }
             ;
 
