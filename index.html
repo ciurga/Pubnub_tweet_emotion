@@ -45,8 +45,8 @@
             var channel = 'pubnub-mapbox' + getNonZeroRandomNumber();
             var new_point = [];
             var le;
-            var re_pos = /(:\)|:\)\)|:'\))/;
-            var re_neg = /(:\(|:\(|:'\(|❤ )/;
+            var re_pos = /(:\)|:\)\)|:'\)|❤)/;
+            var re_neg = /(:\(|:\(|:'\( )/;
             var re_love = /❤/;
             var degree = 0;
             //var re = /(:\)|:'\))/;
@@ -96,15 +96,15 @@
                         console.log(msg);
                         if (msg.place != null) {
                             new_p = msg.place.bounding_box.coordinates[0][0];
-                            console.log("point " + msg.place.bounding_box.coordinates[0][0]);
-                            console.log("country " + msg.place.country);
-                            console.log("message " + msg.text);
+                            //console.log("point " + msg.place.bounding_box.coordinates[0][0]);
+                            
 
                             le = new_point.length;
                             var bp = Boolean(msg.text.match(re_pos));
                             var bn = Boolean(msg.text.match(re_neg));
                             if (bp || bn) {
-                                //if (msg.text.includes(":)")){
+                                if (msg.lang === 'it'){
+                                    console.log("country " + msg.place.country + "message " + msg.text);
                                 new_point = JSON.parse(JSON.stringify(new_point));
                                 new_point[le] = {
                                     degree: bp ? 1 : -1,
@@ -118,7 +118,7 @@
 
                                 publish(new_point3);
                             }
-                            //}
+                            }
                         }
                     }
                 });
