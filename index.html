@@ -37,7 +37,7 @@
             }
             #map {
                 position:absolute;
-                top:0;
+                top:120px;
                 bottom:0;
                 width:100%;
             }
@@ -48,6 +48,13 @@
                 vertical-align: -0.1em;
             }
         </style>
+         <style>
+        body {font-family: monospace; line-height: 160%; font-size: 18px; }
+        ul {list-style: none; margin: 0; padding: 0; display: inline;}
+        li {display: inline; min-width: 80px; padding: 10px; background-color: #eee; margin: 10;}
+        input {border: 1px dotted #ccc; background: white; font-family: monospace; padding: 10px 20px; font-size: 15px; margin: 20px 10px 20px 0; color: red;}
+        input:focus { background-color:white; outline: none;}
+    </style>
 
         <script src="//twemoji.maxcdn.com/twemoji.min.js"></script>
         <script type="text/javascript" src="http://pubnub.github.io/eon/v/eon/0.0.9/eon.js"></script>
@@ -57,13 +64,15 @@
 <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>-->
     </head>
     <body>
+        <!--
         <header>
             <h1><i class="fa fa-twitter"></i> How is America feeling right now?</h1>
             <p>This map shows the emotional "state" of each state at any given moment. Positive or negative sentiments are loosely determined based on an analysis of key words used in tweets. The realtime data comes from the <a href="https://twitter.com/pubnub" target="_blank">@PubNub</a> Data Stream Network and PubNub's out-of-the-box access to the live Twitter stream.
             </p>
-        </header>
+        </header>-->
         <section id="main">
-            <section id="map" class="map"></section>
+            
+            <div id="map" class="map"></div>
             <!-- <section class="tweet">
                  <blockquote class="h-entry">
                      <a class="button" role="button" title="Follow on Twitter" href="" target="_blank"><img src="images/twitter-button.png"></a>
@@ -83,8 +92,41 @@
                  </blockquote>
                  <div class="emotion"></div>
              </section>-->
+            
         </section>
+        <form name="myform" onSubmit="return handleClick()">
+                <input name="Submit"  type="submit" value="Search" >
+                <input type="text" id="myVal" placeholder="Add some text&hellip;">
+            </form>
 
+        <ul></ul>
+
+        <script>
+ 
+            var dataset = [];
+ 
+ 
+            function handleClick(event){
+                console.log(document.getElementById("myVal").value);
+                draw(document.getElementById("myVal").value);
+                //m = document.getElementById("map");
+                //m.style.display = 'none';
+                refresh_point();
+                document.getElementById("map").get
+                return false;
+            }
+ 
+            function draw(val){
+                d3.select("body").select("ul").append("li");
+                dataset.push(val);
+                var p = d3.select("body").selectAll("li")
+                .data(dataset)
+                .text(function(d,i){return i + ": " + d;})
+            }
+ 
+        </script>
+
+        
         <script>
             function getNonZeroRandomNumber() {
                 var random = Math.floor(Math.random() * 199) - 99;
@@ -135,43 +177,50 @@
             var re_neg = emoji_neg.join(" | ");
             
             var degree = 0;
+            var marker;
+            var markers = new L.FeatureGroup();
 
             //var re = /(:\)|:'\))/;
 
-            eon.map({
-                id: 'map',
-                mb_token: 'pk.eyJ1IjoiaWFuamVubmluZ3MiLCJhIjoiZExwb0p5WSJ9.XLi48h-NOyJOCJuu1-h-Jg',
-                mb_id: 'ianjennings.l896mh2e',
-                channel: channel,
-                marker: function (latlng, data) {
-                    var marker = new L.Marker(latlng, {
-                        icon: L.icon({
-                            iconUrl: face(data),
-                            iconSize: [34, 34]
-                        })
-                    });
-                    
-                    var popup = '<div class="middle"><font face="Arial" size="4">' + twemoji.parse(d(data[0])) + "</font></div>";
-                    var p0 = '<blockquote class="h-entry">';
-                    var pn = '</blockquote>'
-                    var p3 = '<a class="button" role="button" title="Follow on Twitter" href="" target="_blank"><img src="images/twitter-button.png"></a>';
-                    var p1 = '<div class="text">'+popup+'</div><div class="timestamp">'+data[6]+'</div>';
-                    //var p2 = '<div class="header" style="background-image:url(' + data[4] + ')"><div class="name">'+data[5]+'</div><div class="screenname">'+data[3]+'</div></div>'
-                    var p4 = '<img src='+ data[4] + ' align="left">'
-                    var p2 = '<div class="header" style="height:60px">'+p4+'<div class="name" align="right" size="3">'+data[5]+'</div><div class="screenname" align="right" size="3">'+data[3]+'</div></div>'
-                    
-                    //var s = document.querySelector(".header").style.backgroundImage = "url(" + data[4] + ")" ;
-                    
-                    var p = p0+ p2+p1+pn;
-                    marker.bindPopup(p);
-                    return marker;
-                },
-                connect: connect,
-                options: {
-                    zoomAnimation: false
-                }
-            });
+                var e = eon.map({
+                    id: 'map',
+                    mb_token: 'pk.eyJ1IjoiaWFuamVubmluZ3MiLCJhIjoiZExwb0p5WSJ9.XLi48h-NOyJOCJuu1-h-Jg',
+                    mb_id: 'ianjennings.l896mh2e',
+                    channel: channel,
+                    marker: function (latlng, data) {
+                        marker = new L.Marker(latlng, {
+                            icon: L.icon({
+                                iconUrl: face(data),
+                                iconSize: [34, 34]
+                            })
+                        });
 
+                        var popup = '<div class="middle"><font face="Arial" size="4">' + twemoji.parse(d(data[0])) + "</font></div>";
+                        var p0 = '<blockquote class="h-entry">';
+                        var pn = '</blockquote>'
+                        var p3 = '<a class="button" role="button" title="Follow on Twitter" href="" target="_blank"><img src="images/twitter-button.png"></a>';
+                        var p1 = '<div class="text">'+popup+'</div><div class="timestamp">'+data[6]+'</div>';
+                        //var p2 = '<div class="header" style="background-image:url(' + data[4] + ')"><div class="name">'+data[5]+'</div><div class="screenname">'+data[3]+'</div></div>'
+                        var p4 = '<img src='+ data[4] + ' align="left">'
+                        var p2 = '<div class="header" style="height:60px">'+p4+'<div class="name" align="right" size="3">'+data[5]+'</div><div class="screenname" align="right" size="3">'+data[3]+'</div></div>'
+
+                        //var s = document.querySelector(".header").style.backgroundImage = "url(" + data[4] + ")" ;
+
+                        var p = p0+ p2+p1+pn;
+                        markers.addLayer(marker);
+                        
+                        
+                        marker.bindPopup(p);
+                        return marker;
+                    },
+                    connect: connect,
+                    options: {
+                        zoomAnimation: false
+                    }
+                });
+                
+            e.addLayer(markers);
+            
             function connect() {
                 var point = {
                     latlng: [37.370375, -97.756138]
@@ -196,12 +245,14 @@
                             new_p = msg.place.bounding_box.coordinates[0][0];
                             //console.log("point " + msg.place.bounding_box.coordinates[0][0]);
 
-
+                            var query = d3.select("body").selectAll("li").data();
+                            var re_query = query.join(" | ");
                             le = new_point.length;
                             var bp = Boolean(msg.text.match(re_pos));
                             var bn = Boolean(msg.text.match(re_neg));
                             var bl = Boolean(msg.text.match(re_love));
                             if (bp || bn || bl) {
+                                if (Boolean(msg.text.match(re_query))){
                                 //if (msg.lang === 'it'){
                                 console.log("country " + msg.place.country + " message " + msg.text);
                                 new_point = JSON.parse(JSON.stringify(new_point));
@@ -219,7 +270,10 @@
                             //}
                         }
                     }
+                    }
                 });
+                
+                
 
                 function publish(nn) {
                     pn.publish({
@@ -229,6 +283,11 @@
                 }
             }
             ;
+            function refresh_point(){
+                    new_point = [];
+                    e.removeLayer(markers);
+                    
+                }
 
         </script>
     </body>
