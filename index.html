@@ -4,21 +4,27 @@
         <meta charset=utf-8 />
         <title>Twitter emotion</title>
         <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+        <link rel="stylesheet" type="text/css" href="css/jquery.tagsinput.css" />
+
+        <link type="text/css" rel="stylesheet" href="//pubnub.github.io/eon/v/eon/0.0.9/eon.css" />
+        <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/themes/start/jquery-ui.css" />
+        <link type="text/css" rel="stylesheet" href="css/index.css">
         <!--<style>
+        
             body {
                 margin: 0;
                 /*padding: 0px 100px;*/
             }
             .map {
                 width: 100%;
-                height: 500px;
+                height: 600px;
             }
-            .map, #chart {
-                margin-top: 60px;
-                margin-bottom: 40px;
+            .map, #pie_chart {
+                margin-top: 10px;
+                margin-bottom: 10px;
             }
             p, iframe, h1,h2,h3,h4,h5,h6,p,.map {
-                margin: 20px 0px;
+                margin: 10px 0px;
             }
             h1 {
                 margin-top: 0px;
@@ -29,7 +35,7 @@
             .about {
                 border-bottom: 1px solid #efefef;
             }
-        </style>-->
+        </style>
         <style>
             body {
                 margin: 0;
@@ -47,21 +53,20 @@
                 margin: 0 .05em 0 .1em;
                 vertical-align: -0.1em;
             }
-        </style>
-         <style>
-        body {font-family: monospace; line-height: 160%; font-size: 18px; }
-        ul {list-style: none; margin: 0; padding: 0; display: inline;}
-        li {display: inline; min-width: 80px; padding: 10px; background-color: #eee; margin: 10;}
-        input {border: 1px dotted #ccc; background: white; font-family: monospace; padding: 10px 20px; font-size: 15px; margin: 20px 10px 20px 0; color: red;}
-        input:focus { background-color:white; outline: none;}
-    </style>
+        </style>-->
 
         <script src="//twemoji.maxcdn.com/twemoji.min.js"></script>
         <script type="text/javascript" src="http://pubnub.github.io/eon/v/eon/0.0.9/eon.js"></script>
-        <link type="text/css" rel="stylesheet" href="http://pubnub.github.io/eon/v/eon/0.0.9/eon.css" />
+
+        <script src="bower_components/jquery/dist/jquery.min.js"></script>
+        <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/jquery-ui.min.js'></script>
+        <script src="js/jquery.tagsinput.js"></script>
+        <script src="js/d3.layout.cloud.js"></script>
+
+
 
         <!--<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
-<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>-->
+        <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>-->
     </head>
     <body>
         <!--
@@ -70,63 +75,284 @@
             <p>This map shows the emotional "state" of each state at any given moment. Positive or negative sentiments are loosely determined based on an analysis of key words used in tweets. The realtime data comes from the <a href="https://twitter.com/pubnub" target="_blank">@PubNub</a> Data Stream Network and PubNub's out-of-the-box access to the live Twitter stream.
             </p>
         </header>-->
+
+        <div id="dashboard">
+
+            <div id="tags">
+                <!--<p><label>Search:</label>-->
+                <input id="tags_1" type="text" class="tags" value="" />
+            </div>
+
+            <div id="title">
+            </div>
+            <div class="chart bar">
+                <div id="bar-chart"></div>
+            </div>
+            <div class="chart spline">
+                <div id="spline-chart"></div>
+            </div>
+            <div class="chart pie">
+                <div id="pie_chart"></div>
+            </div>
+            <div id="map"></div>
+        </div>
+
+        <!--
         <section id="main">
-            
+            <p><label>Defaults:</label>
+      <input id="tags_1" type="text" class="tags" value="foo" /></p>
+
             <div id="map" class="map"></div>
-            <!-- <section class="tweet">
-                 <blockquote class="h-entry">
-                     <a class="button" role="button" title="Follow on Twitter" href="" target="_blank"><img src="images/twitter-button.png"></a>
-                     <div class="header">
-                         <div class="name"></div>
-                         <div class="screenname"></div>
-                     </div>
- 
-                     <div class="text"></div>
-                     <div class="timestamp"></div>
- 
-                     <div class="actions">
-                         <a class="reply" href="" target="_blank"><i class="fa fa-reply"></i></a>
-                         <a class="retweet" href="" target="_blank"><i class="fa fa-retweet"></i></a>
-                         <a class="favorite" href="" target="_blank"><i class="fa fa-star"></i></a>
-                     </div>
-                 </blockquote>
-                 <div class="emotion"></div>
-             </section>-->
-            
-        </section>
+        <!-- <section class="tweet">
+             <blockquote class="h-entry">
+                 <a class="button" role="button" title="Follow on Twitter" href="" target="_blank"><img src="images/twitter-button.png"></a>
+                 <div class="header">
+                     <div class="name"></div>
+                     <div class="screenname"></div>
+                 </div>
+
+                 <div class="text"></div>
+                 <div class="timestamp"></div>
+
+                 <div class="actions">
+                     <a class="reply" href="" target="_blank"><i class="fa fa-reply"></i></a>
+                     <a class="retweet" href="" target="_blank"><i class="fa fa-retweet"></i></a>
+                     <a class="favorite" href="" target="_blank"><i class="fa fa-star"></i></a>
+                 </div>
+             </blockquote>
+             <div class="emotion"></div>
+         </section>-->
+        <!--<div id="chart" class="relative" style="display: inline; border: none; height: 20px; padding: 10;"></div>
+    </section>-->
+
+
+        <!--
         <form name="myform" onSubmit="return handleClick()">
-                <input name="Submit"  type="submit" value="Search" >
-                <input type="text" id="myVal" placeholder="Add some text&hellip;">
-            </form>
+            <input name="Submit"  type="submit" value="Search" >
+            <input type="text" id="myVal" placeholder="Add some text&hellip;">
+        </form>
 
-        <ul></ul>
+        <ul></ul>-->
 
-        <script>
- 
-            var dataset = [];
- 
- 
-            function handleClick(event){
-                console.log(document.getElementById("myVal").value);
-                draw(document.getElementById("myVal").value);
-                //m = document.getElementById("map");
-                //m.style.display = 'none';
+        <script type="text/javascript">
+            function onAddTag(tag) {
+                alert("Added a tag: " + tag);
                 refresh_point();
-                //document.getElementById("map").get
-                return false;
             }
- 
-            function draw(val){
-                d3.select("body").select("ul").append("li");
-                dataset.push(val);
-                var p = d3.select("body").selectAll("li")
-                .data(dataset)
-                .text(function(d,i){return i + ": " + d;})
+            function onRemoveTag(tag) {
+                alert("Removed a tag: " + tag);
             }
- 
+            function onChangeTag(input, tag) {
+                alert("Changed a tag: " + tag);
+            }
+            $(function () {
+                $('#tags_1').tagsInput({
+                    width: 'auto',
+                    onChange: function (elem, elem_tags)
+                    {
+                        /*var languages = ['php','ruby','javascript'];
+                         $('.tag', elem_tags).each(function()
+                         {
+                         if($(this).text().search(new RegExp('\\b(' + languages.join('|') + ')\\b')) >= 0)
+                         $(this).css('background-color', 'yellow');
+                         });*/
+                        refresh_point();
+                    }
+                });
+            });
         </script>
 
-        
+
+        <script>
+            // http://www.brettdangerfield.com/post/realtime_data_tag_cloud/
+
+            var fontSize = d3.scale.log().range([30, 80]);
+            var fill = d3.scale.category20();
+            var wordCount = {};
+            var mycloud;
+            createWord();
+
+            function createWord() {
+                d3.select("body").append("svg")
+                        .attr("top", 20)         // position the left of the rectangle
+                        .attr("left", 50)
+                        .attr("width", 400)
+                        .attr("height", 400);
+                $("svg").css({top: 200, left: 800, position:'absolute'});
+                
+                mycloud = d3.layout.cloud().size([400, 400])
+                        .words([])
+                        .padding(2)
+                        .rotate(function () {
+                            return ~~(Math.random() * 2) * 90;
+                        })
+                        // .rotate(function() { return 0; })
+                        .font("Impact")
+                        .fontSize(function (d) {
+                            return fontSize(d.size);
+                        })
+                        .on("end", draw)
+            }
+
+            /*var colors = d3.scale.category20b();
+             function calculateCloud(data) {
+             d3.layout.cloud()
+             .size([600, 400])
+             .words(data) // data from PubNub
+             .rotate(function () {
+             return ~~(Math.random() * 2) * 90;
+             }) // 0 or 90deg
+             .fontSize(function (d) {
+             return d.size;
+             })
+             .on('end', drawCloud)
+             .start();
+             }
+             
+             
+             function drawCloud(words) {
+             d3.select('#cloud').append('svg')
+             .attr('width', 600).attr('height', 400)
+             .append('g')
+             .selectAll('text')
+             .data(words)
+             .enter().append('text')
+             .style('font-size', function (d) {
+             return d.size + 'px';
+             })
+             .style('font-family', function (d) {
+             return d.font;
+             })
+             .style('fill', function (d, i) {
+             return colors(i);
+             })
+             .attr('text-anchor', 'middle')
+             .attr('transform', function (d) {
+             return 'translate(' + [d.x, d.y] + ')rotate(' + d.rotate + ')';
+             })
+             .text(function (d) {
+             return d.text;
+             });
+             }*/
+
+            function processData(strings) {
+                if (!strings)
+                    return;
+
+                // convert the array to a long string
+                //strings = strings.join(' ');
+
+                // strip stringified objects and punctuations from the string
+                strings = strings.toLowerCase().replace(/object Object/g, '').replace(/[\+\.,\/#!$%\^&\*{}=_`~]/g, '');
+
+                // convert the str back in an array 
+                strings = strings.split(' ');
+
+                // Count frequency of word occurance
+
+
+                for (var i = 0; i < strings.length; i++) {
+                    if (!wordCount[strings[i]])
+                        wordCount[strings[i]] = 0;
+
+                    wordCount[strings[i]]++; // {'hi': 12, 'foo': 2 ...}
+                }
+
+                //console.log(wordCount);
+
+                var wordCountArr = [];
+
+                for (var prop in wordCount) {
+                    wordCountArr.push({text: prop, size: wordCount[prop]});
+                }
+
+                return wordCountArr;
+            }
+
+
+
+            
+            function draw(words) {
+                //fade existing tag cloud out
+                d3.select("body").selectAll("svg").selectAll("g")
+                        .transition()
+                        .duration(1000)
+                        .style("opacity", 1e-6)
+                        .remove();
+
+                //render new tag cloud
+                d3.select("body").selectAll("svg")
+                        .append("g")
+                        .attr("transform", "translate(300,300)")
+                        .selectAll("text")
+                        .data(words)
+                        .enter().append("text")
+                        .style("font-size", function (d) {
+                            return ((d.size) * 1) + "px";
+                        })
+                        .style("font-family", "Impact")
+                        .style("fill", function (d, i) {
+                            return fill(i);
+                        })
+                        .style("opacity", 1e-6)
+                        .attr("text-anchor", "middle")
+                        .attr("transform", function (d) {
+                            return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                        })
+                        .transition()
+                        .duration(1000)
+                        .style("opacity", 1)
+                        .text(function (d) {
+                            return d.text;
+                        });
+            }
+
+        </script>
+
+        <script>
+
+            var pub_chart = PUBNUB.init({
+                publish_key: 'pub-c-6dbe7bfd-6408-430a-add4-85cdfe856b47',
+                subscribe_key: 'sub-c-2a73818c-d2d3-11e3-9244-02ee2ddab7fe'
+            });
+
+            //var channel_chart = 'c3-gauge'  + Math.random();
+            var channel_chart = 'c3-gauge' + Math.random();
+
+            eon.chart({
+                pubnub: pub_chart,
+                channel: channel_chart,
+                generate: {
+                    bindto: '#pie_chart',
+                    data: {
+                        type: 'gauge'
+                    }
+                },
+                gauge: {
+                    min: 0,
+                    max: 100
+                },
+                color: {
+                    pattern: ['#FF0000', '#F6C600', '#60B044'],
+                    threshold: {
+                        values: [30, 60, 200]
+                    }
+                }
+            });
+            //start_chart();
+
+            function start_chart() {
+                pub_chart.publish({
+                    channel: channel_chart,
+                    message: {
+                        eon: {
+                            'Sentiment': Math.floor(100)
+                        }
+                    }
+                });
+            }
+        </script>
+
         <script>
             function getNonZeroRandomNumber() {
                 var random = Math.floor(Math.random() * 199) - 99;
@@ -141,87 +367,92 @@
                 });
             }
 
-        
-        function face(data){
-            if (data[1] > 0){
-                return 'images/grinning-face.png';
-            } else if (data[2] > 0){
-                return 'images/heart-eyed-happy-face.png';
-            } else {
-                return 'images/angry-face.png'
+
+            function face(data) {
+                if (data[1] > 0) {
+                    return 'images/grinning-face.png';
+                } else if (data[2] > 0) {
+                    return 'images/heart-eyed-happy-face.png';
+                } else {
+                    return 'images/angry-face.png'
+                }
             }
-        }
-        
-        function toDate(timestamp_ms){
-            var e = new Date(parseInt(timestamp_ms)), 
-                        f = e.toDateString().substr(4), 
+
+            function toDate(timestamp_ms) {
+                var e = new Date(parseInt(timestamp_ms)),
+                        f = e.toDateString().substr(4),
                         g = e.getHours() > 12 ? e.getHours() - 12 + ":" + e.getMinutes() + " PM" : e.getHours() + ":" + e.getMinutes() + " AM;";
                 var timestamp = g + " - " + f;
-            return timestamp;
-        }
-        
+                return timestamp;
+            }
+
         </script>
         <script>
-            var channel = 'pubnub-mapbox' + getNonZeroRandomNumber();
+            var channel_map = 'pubnub-mapbox' + getNonZeroRandomNumber();
             var new_point = [];
             var le;
 
-            var emoji_love = ['❤','\\ud83c\\udfe9','\\ud83d\\udc8c','\\u2665\\u2764','\\ud83d\\ude0d','\\ud83d\\ude3b','\\ud83d\\udc91','\\ud83d\\udc93','\\ud83d\\udc94','\\ud83d\\udc95','\\ud83d\\udc96','\\ud83d\\udc97','\\ud83d\\udc98','\\ud83d\\udc99','\\ud83d\\udc9a','\\ud83d\\udc9b','\\ud83d\\udc9c','\\ud83d\\udc9d','\\ud83d\\udc9e','\\ud83d\\udc9f'];
-            var emoji_neg = [':\\\(',':\\\(\\\(',':\\\'\\\(','\\ud83d\\ude22','\\ud83d\\ude14','\\ud83d\\ude12','\\ud83d\\ude16','\\ud83d\\ude35','\\ud83d\\ude23','\\ud83d\\ude1f','\\ud83d\\ude14','\\ud83d\\ude1e','\\ud83d\\ude20','\\ud83d\\ude29','\\ud83d\\ude28','\\ud83d\\ude28','\\ud83d\\ude2d','\\ud83d\\ude22','\\ud83d\\ude2d','\\ud83d\\ude3f','\\ud83d\\ude21','\\ud83d\\ude35'];
-            var emoji_pos = [':\\\)',':\\\)\\\)',':\\\'\\\)','\\ud83d\\ude01','\\ud83d\\ude03','\\ud83d\\ude04','\\ud83d\\ude05','\\ud83d\\ude06','\\ud83d\\ude0a','\\ud83d\\ude0d','\\ud83d\\ude38','\\ud83d\\ude3a','\\ud83d\\ude3b','\\ud83d\\ude07','\\ud83d\\ude08','\\ud83d\\ude0e','\\ud83d\\ude19','\\ud83d\\ude4b','\\ud83d\\ude02','\\ud83d\\ude39','\\ud83d\\ude09','\\ud83d\\ude1c','\\ud83d\\ude1b','\\ud83d\\ude0b'];
+            var total = 0, positive = 0, negative = 0;
+
+
+
+            var emoji_love = ['❤', '\\ud83c\\udfe9', '\\ud83d\\udc8c', '\\u2665\\u2764', '\\ud83d\\ude0d', '\\ud83d\\ude3b', '\\ud83d\\udc91', '\\ud83d\\udc93', '\\ud83d\\udc94', '\\ud83d\\udc95', '\\ud83d\\udc96', '\\ud83d\\udc97', '\\ud83d\\udc98', '\\ud83d\\udc99', '\\ud83d\\udc9a', '\\ud83d\\udc9b', '\\ud83d\\udc9c', '\\ud83d\\udc9d', '\\ud83d\\udc9e', '\\ud83d\\udc9f'];
+            var emoji_neg = [':\\\(', ':\\\(\\\(', ':\\\'\\\(', '\\ud83d\\ude22', '\\ud83d\\ude14', '\\ud83d\\ude12', '\\ud83d\\ude16', '\\ud83d\\ude35', '\\ud83d\\ude23', '\\ud83d\\ude1f', '\\ud83d\\ude14', '\\ud83d\\ude1e', '\\ud83d\\ude20', '\\ud83d\\ude29', '\\ud83d\\ude28', '\\ud83d\\ude28', '\\ud83d\\ude2d', '\\ud83d\\ude22', '\\ud83d\\ude2d', '\\ud83d\\ude3f', '\\ud83d\\ude21', '\\ud83d\\ude35'];
+            var emoji_pos = [':\\\)', ':\\\)\\\)', ':\\\'\\\)', '\\ud83d\\ude01', '\\ud83d\\ude03', '\\ud83d\\ude04', '\\ud83d\\ude05', '\\ud83d\\ude06', '\\ud83d\\ude0a', '\\ud83d\\ude0d', '\\ud83d\\ude38', '\\ud83d\\ude3a', '\\ud83d\\ude3b', '\\ud83d\\ude07', '\\ud83d\\ude08', '\\ud83d\\ude0e', '\\ud83d\\ude19', '\\ud83d\\ude4b', '\\ud83d\\ude02', '\\ud83d\\ude39', '\\ud83d\\ude09', '\\ud83d\\ude1c', '\\ud83d\\ude1b', '\\ud83d\\ude0b'];
             // http://apps.timwhitlock.info/emoji/tables/unicode
             // http://apps.timwhitlock.info/emoji/tools/finder#
-            
+
             var re_love = emoji_love.join(" | ");
             var re_pos = emoji_pos.join(" | ");
             var re_neg = emoji_neg.join(" | ");
-            
+
             var degree = 0;
             var marker;
-            var markers = new L.FeatureGroup();
+            var markers_visible = new L.FeatureGroup();
 
             //var re = /(:\)|:'\))/;
 
-                var e = eon.map({
-                    id: 'map',
-                    mb_token: 'pk.eyJ1IjoiaWFuamVubmluZ3MiLCJhIjoiZExwb0p5WSJ9.XLi48h-NOyJOCJuu1-h-Jg',
-                    mb_id: 'ianjennings.l896mh2e',
-                    channel: channel,
-                    marker: function (latlng, data) {
-                        marker = new L.Marker(latlng, {
-                            icon: L.icon({
-                                iconUrl: face(data),
-                                iconSize: [34, 34]
-                            })
-                        });
+            var e = eon.map({
+                id: 'map',
+                mb_token: 'pk.eyJ1IjoiaWFuamVubmluZ3MiLCJhIjoiZExwb0p5WSJ9.XLi48h-NOyJOCJuu1-h-Jg',
+                mb_id: 'ianjennings.l896mh2e',
+                channel: channel_map,
+                marker: function (latlng, data) {
+                    marker = new L.Marker(latlng, {
+                        icon: L.icon({
+                            iconUrl: face(data),
+                            iconSize: [34, 34]
+                        })
+                    });
 
-                        var popup = '<div class="middle"><font face="Arial" size="4">' + twemoji.parse(d(data[0])) + "</font></div>";
-                        var p0 = '<blockquote class="h-entry">';
-                        var pn = '</blockquote>'
-                        var p3 = '<a class="button" role="button" title="Follow on Twitter" href="" target="_blank"><img src="images/twitter-button.png"></a>';
-                        var p1 = '<div class="text">'+popup+'</div><div class="timestamp">'+data[6]+'</div>';
-                        //var p2 = '<div class="header" style="background-image:url(' + data[4] + ')"><div class="name">'+data[5]+'</div><div class="screenname">'+data[3]+'</div></div>'
-                        var p4 = '<img src='+ data[4] + ' align="left">'
-                        var p2 = '<div class="header" style="height:60px">'+p4+'<div class="name" align="right" size="3">'+data[5]+'</div><div class="screenname" align="right" size="3">'+data[3]+'</div></div>'
+                    var popup = '<div class="middle"><font face="Arial" size="4">' + twemoji.parse(d(data[0])) + "</font></div>";
+                    var p0 = '<blockquote class="h-entry">';
+                    var pn = '</blockquote>'
+                    var p3 = '<a class="button" role="button" title="Follow on Twitter" href="" target="_blank"><img src="images/twitter-button.png"></a>';
+                    var p1 = '<div class="text">' + popup + '</div><div class="timestamp">' + data[6] + '</div>';
+                    //var p2 = '<div class="header" style="background-image:url(' + data[4] + ')"><div class="name">'+data[5]+'</div><div class="screenname">'+data[3]+'</div></div>'
+                    var p4 = '<img src=' + data[4] + ' align="left">'
+                    var p2 = '<div class="header" style="height:60px">' + p4 + '<div class="name" align="right" size="3">' + data[5] + '</div><div class="screenname" align="right" size="3">' + data[3] + '</div></div>'
 
-                        //var s = document.querySelector(".header").style.backgroundImage = "url(" + data[4] + ")" ;
+                    //var s = document.querySelector(".header").style.backgroundImage = "url(" + data[4] + ")" ;
 
-                        var p = p0+ p2+p1+pn;
-                        markers.addLayer(marker);
-                        
-                        
-                        marker.bindPopup(p);
-                        return marker;
-                    },
-                    connect: connect,
-                    options: {
-                        zoomAnimation: false
-                    }
-                });
-                
-            e.addLayer(markers);
-            
+                    var p = p0 + p2 + p1 + pn;
+                    markers_visible.addLayer(marker);
+                    marker.bindPopup(p);
+                    return marker;
+                },
+                connect: connect,
+                options: {
+                    zoomAnimation: false
+                }
+            });
+
+            //e.addLayer(markers_visible);
+
             function connect() {
+
+
+
                 var point = {
                     latlng: [37.370375, -97.756138]
                 };
@@ -236,6 +467,7 @@
 
                 var new_point3 = JSON.parse(JSON.stringify(point));
                 var new_p;
+                total = 0, positive = 0, negative = 0;
 
                 pn_tweet.subscribe({
                     channel: 'pubnub-twitter',
@@ -245,49 +477,86 @@
                             new_p = msg.place.bounding_box.coordinates[0][0];
                             //console.log("point " + msg.place.bounding_box.coordinates[0][0]);
 
-                            var query = d3.select("body").selectAll("li").data();
-                            var re_query = query.join(" | ");
+                            //var query = d3.select("body").selectAll("li").data();
+                            var query = $('span').text().split("  ");
+                            var query_odd = query.filter(function (val) {
+                                return val.indexOf("x") === -1 && val.length > 0;
+                            });
+                            var re_query = query_odd.join(" | ");
                             le = new_point.length;
                             var bp = Boolean(msg.text.match(re_pos));
                             var bn = Boolean(msg.text.match(re_neg));
                             var bl = Boolean(msg.text.match(re_love));
                             if (bp || bn || bl) {
-                                if (Boolean(msg.text.match(re_query))){
-                                //if (msg.lang === 'it'){
-                                console.log("country " + msg.place.country + " message " + msg.text);
-                                new_point = JSON.parse(JSON.stringify(new_point));
-                                new_point[le] = {
-                                    data: [msg.text, bp ? 1 : -1, bl ? 1 : -1, "@" +msg.user.screen_name, msg.user.profile_image_url, msg.user.name, toDate(msg.timestamp_ms)],
-                                    latlng: [
-                                        new_p[1],
-                                        new_p[0]
-                                    ]
-                                };
-                                new_point3 = JSON.parse(JSON.stringify(new_point));
 
-                                publish(new_point3);
+                                total++;
+                                if (bp || bl) {
+                                    positive++;
+                                } else {
+                                    negative++;
+                                }
+
+                                if (Boolean(msg.text.match(re_query))) {
+                                    //if (msg.lang === 'it'){
+                                    console.log("country " + msg.place.country + " message " + msg.text);
+                                    new_point = JSON.parse(JSON.stringify(new_point));
+                                    new_point[le] = {
+                                        data: [msg.text, bp ? 1 : -1, bl ? 1 : -1, "@" + msg.user.screen_name, msg.user.profile_image_url, msg.user.name, toDate(msg.timestamp_ms)],
+                                        latlng: [
+                                            new_p[1],
+                                            new_p[0]
+                                        ]
+                                    };
+                                    new_point3 = JSON.parse(JSON.stringify(new_point));
+
+                                    publish(new_point3);
+                                    //calculateCloud(processData(msg.text));
+                                    mycloud.stop().words(processData(msg.text)).start();
+                                    e.addLayer(markers_visible);
+                                }
+                                //}
                             }
-                            //}
                         }
                     }
-                    }
                 });
-                
-                
+
+
 
                 function publish(nn) {
                     pn.publish({
-                        channel: channel,
+                        channel: channel_map,
                         message: nn
+                    });
+
+                    pub_chart.publish({
+                        channel: channel_chart,
+                        message: {
+                            eon: {
+                                'data': positive/total
+                            }
+                        }
                     });
                 }
             }
             ;
-            function refresh_point(){
-                    new_point = [];
-                    e.removeLayer(markers);
-                    
-                }
+
+
+
+            function refresh_point() {
+                new_point = [];
+                wordCount = {};
+                total = 0, positive = 0, negative = 0;
+                d3.select("body").selectAll("svg").remove();
+                createWord();
+                //e.removeLayer(markers_visible);
+                //e.remove();
+                //markers_visible.clearLayers();
+                markers_visible.eachLayer(function (layer) {
+                    //console.log('Hello');
+                    e.removeLayer(layer);
+                });
+
+            }
 
         </script>
     </body>
