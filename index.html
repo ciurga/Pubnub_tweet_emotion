@@ -95,6 +95,7 @@
                 <div id="pie_chart"></div>
             </div>
             <div id="map"></div>
+            <div id="wordcloud"></div>
         </div>
 
         <!--
@@ -173,14 +174,14 @@
             createWord();
 
             function createWord() {
-                d3.select("body").append("svg")
+                d3.select("#wordcloud").append("svg")
                         .attr("top", 20)         // position the left of the rectangle
                         .attr("left", 50)
-                        .attr("width", 400)
-                        .attr("height", 400);
-                $("svg").css({top: 200, left: 800, position:'absolute'});
+                        .attr("width", 500)
+                        .attr("height", 500);
+                $("svg").css({top: 600, left: 600, position:'absolute'});
                 
-                mycloud = d3.layout.cloud().size([400, 400])
+                mycloud = d3.layout.cloud().size([500, 500])
                         .words([])
                         .padding(2)
                         .rotate(function () {
@@ -274,14 +275,14 @@
             
             function draw(words) {
                 //fade existing tag cloud out
-                d3.select("body").selectAll("svg").selectAll("g")
+                d3.select("#wordcloud").selectAll("svg").selectAll("g")
                         .transition()
                         .duration(1000)
                         .style("opacity", 1e-6)
                         .remove();
 
                 //render new tag cloud
-                d3.select("body").selectAll("svg")
+                d3.select("#wordcloud").selectAll("svg")
                         .append("g")
                         .attr("transform", "translate(300,300)")
                         .selectAll("text")
@@ -335,7 +336,7 @@
                 color: {
                     pattern: ['#FF0000', '#F6C600', '#60B044'],
                     threshold: {
-                        values: [30, 60, 200]
+                        values: [30, 60, 80]
                     }
                 }
             });
@@ -532,7 +533,7 @@
                         channel: channel_chart,
                         message: {
                             eon: {
-                                'data': positive/total
+                                'data': Math.floor((positive/total)*100)
                             }
                         }
                     });
