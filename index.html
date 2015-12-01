@@ -9,51 +9,6 @@
         <link type="text/css" rel="stylesheet" href="//pubnub.github.io/eon/v/eon/0.0.9/eon.css" />
         <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/themes/start/jquery-ui.css" />
         <link type="text/css" rel="stylesheet" href="css/index.css">
-        <!--<style>
-        
-            body {
-                margin: 0;
-                /*padding: 0px 100px;*/
-            }
-            .map {
-                width: 100%;
-                height: 600px;
-            }
-            .map, #pie_chart {
-                margin-top: 10px;
-                margin-bottom: 10px;
-            }
-            p, iframe, h1,h2,h3,h4,h5,h6,p,.map {
-                margin: 10px 0px;
-            }
-            h1 {
-                margin-top: 0px;
-            }
-            .about p {
-                opacity: .7;
-            }
-            .about {
-                border-bottom: 1px solid #efefef;
-            }
-        </style>
-        <style>
-            body {
-                margin: 0;
-                padding: 0;
-            }
-            #map {
-                position:absolute;
-                top:120px;
-                bottom:0;
-                width:100%;
-            }
-            img.emoji {
-                height: 1em;
-                width: 1em;
-                margin: 0 .05em 0 .1em;
-                vertical-align: -0.1em;
-            }
-        </style>-->
 
         <script src="//twemoji.maxcdn.com/twemoji.min.js"></script>
         <script type="text/javascript" src="http://pubnub.github.io/eon/v/eon/0.0.9/eon.js"></script>
@@ -64,14 +19,11 @@
         <script src="js/d3.layout.cloud.js"></script>
 
 
-
-        <!--<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
-        <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>-->
     </head>
     <body>
         <!--
         <header>
-            <h1><i class="fa fa-twitter"></i> How is America feeling right now?</h1>
+            <h1><i class="fa fa-twitter"></i> How is the world feeling right now?</h1>
             <p>This map shows the emotional "state" of each state at any given moment. Positive or negative sentiments are loosely determined based on an analysis of key words used in tweets. The realtime data comes from the <a href="https://twitter.com/pubnub" target="_blank">@PubNub</a> Data Stream Network and PubNub's out-of-the-box access to the live Twitter stream.
             </p>
         </header>-->
@@ -98,66 +50,15 @@
             <div id="wordcloud"></div>
         </div>
 
-        <!--
-        <section id="main">
-            <p><label>Defaults:</label>
-      <input id="tags_1" type="text" class="tags" value="foo" /></p>
-
-            <div id="map" class="map"></div>
-        <!-- <section class="tweet">
-             <blockquote class="h-entry">
-                 <a class="button" role="button" title="Follow on Twitter" href="" target="_blank"><img src="images/twitter-button.png"></a>
-                 <div class="header">
-                     <div class="name"></div>
-                     <div class="screenname"></div>
-                 </div>
-
-                 <div class="text"></div>
-                 <div class="timestamp"></div>
-
-                 <div class="actions">
-                     <a class="reply" href="" target="_blank"><i class="fa fa-reply"></i></a>
-                     <a class="retweet" href="" target="_blank"><i class="fa fa-retweet"></i></a>
-                     <a class="favorite" href="" target="_blank"><i class="fa fa-star"></i></a>
-                 </div>
-             </blockquote>
-             <div class="emotion"></div>
-         </section>-->
-        <!--<div id="chart" class="relative" style="display: inline; border: none; height: 20px; padding: 10;"></div>
-    </section>-->
-
-
-        <!--
-        <form name="myform" onSubmit="return handleClick()">
-            <input name="Submit"  type="submit" value="Search" >
-            <input type="text" id="myVal" placeholder="Add some text&hellip;">
-        </form>
-
-        <ul></ul>-->
 
         <script type="text/javascript">
-            function onAddTag(tag) {
-                alert("Added a tag: " + tag);
-                refresh_point();
-            }
-            function onRemoveTag(tag) {
-                alert("Removed a tag: " + tag);
-            }
-            function onChangeTag(input, tag) {
-                alert("Changed a tag: " + tag);
-            }
+            // Script to manage the tag input form
+
             $(function () {
                 $('#tags_1').tagsInput({
                     width: 'auto',
-                    onChange: function (elem, elem_tags)
-                    {
-                        /*var languages = ['php','ruby','javascript'];
-                         $('.tag', elem_tags).each(function()
-                         {
-                         if($(this).text().search(new RegExp('\\b(' + languages.join('|') + ')\\b')) >= 0)
-                         $(this).css('background-color', 'yellow');
-                         });*/
-                        refresh_point();
+                    onChange: function (elem, elem_tags) {
+                        refresh_marker();
                     }
                 });
             });
@@ -165,6 +66,8 @@
 
 
         <script>
+            // Script to manage the Word Cloud
+
             // http://www.brettdangerfield.com/post/realtime_data_tag_cloud/
 
             var fontSize = d3.scale.log().range([30, 80]);
@@ -173,14 +76,17 @@
             var mycloud;
             createWord();
 
+            /**
+             * Create d3 cloud object
+             */
             function createWord() {
                 d3.select("#wordcloud").append("svg")
                         .attr("top", 20)         // position the left of the rectangle
                         .attr("left", 50)
                         .attr("width", 500)
                         .attr("height", 500);
-                $("svg").css({top: 600, left: 600, position:'absolute'});
-                
+                $("svg").css({top: 600, left: 600, position: 'absolute'});
+
                 mycloud = d3.layout.cloud().size([500, 500])
                         .words([])
                         .padding(2)
@@ -192,49 +98,15 @@
                         .fontSize(function (d) {
                             return fontSize(d.size);
                         })
-                        .on("end", draw)
+                        .on("end", draw);
             }
-
-            /*var colors = d3.scale.category20b();
-             function calculateCloud(data) {
-             d3.layout.cloud()
-             .size([600, 400])
-             .words(data) // data from PubNub
-             .rotate(function () {
-             return ~~(Math.random() * 2) * 90;
-             }) // 0 or 90deg
-             .fontSize(function (d) {
-             return d.size;
-             })
-             .on('end', drawCloud)
-             .start();
-             }
-             
-             
-             function drawCloud(words) {
-             d3.select('#cloud').append('svg')
-             .attr('width', 600).attr('height', 400)
-             .append('g')
-             .selectAll('text')
-             .data(words)
-             .enter().append('text')
-             .style('font-size', function (d) {
-             return d.size + 'px';
-             })
-             .style('font-family', function (d) {
-             return d.font;
-             })
-             .style('fill', function (d, i) {
-             return colors(i);
-             })
-             .attr('text-anchor', 'middle')
-             .attr('transform', function (d) {
-             return 'translate(' + [d.x, d.y] + ')rotate(' + d.rotate + ')';
-             })
-             .text(function (d) {
-             return d.text;
-             });
-             }*/
+            
+            /**
+             * Contruct a frequence dictionary 
+             * @param {String} strings - The text message
+             * @returns {processData.wordCountArr|Array|undefined}
+             * 
+             */
 
             function processData(strings) {
                 if (!strings)
@@ -270,9 +142,13 @@
                 return wordCountArr;
             }
 
-
-
             
+
+            /**
+             * Draw the wordcloud 
+             * @param {Array} words - The frequence dictionary
+             * @returns {String}
+             */
             function draw(words) {
                 //fade existing tag cloud out
                 d3.select("#wordcloud").selectAll("svg").selectAll("g")
@@ -311,13 +187,13 @@
         </script>
 
         <script>
+            // Script that generate the EON Chart
 
             var pub_chart = PUBNUB.init({
                 publish_key: 'pub-c-6dbe7bfd-6408-430a-add4-85cdfe856b47',
                 subscribe_key: 'sub-c-2a73818c-d2d3-11e3-9244-02ee2ddab7fe'
             });
 
-            //var channel_chart = 'c3-gauge'  + Math.random();
             var channel_chart = 'c3-gauge' + Math.random();
 
             eon.chart({
@@ -342,6 +218,9 @@
             });
             //start_chart();
 
+            /**
+             * Start the chart with the maximum percentage (100) instead of 0
+             */
             function start_chart() {
                 pub_chart.publish({
                     channel: channel_chart,
@@ -355,20 +234,34 @@
         </script>
 
         <script>
+            //Script for various useful function
+            
+            /**
+             * Generate e non zero random muber
+             * @returns {Number}
+             */
             function getNonZeroRandomNumber() {
                 var random = Math.floor(Math.random() * 199) - 99;
                 if (random === 0)
                     return getNonZeroRandomNumber();
                 return random;
             }
-
+            
+            /**
+             * Convert a html in a text into a clickable link
+             * @param {String} a - Text
+             */
             function d(a) {
                 return a.replace(/((https?|s?ftp|ssh)\:\/\/[^"\s\<\>]*[^.,;'">\:\s\<\>\)\]\!])/g, function (a) {
                     return'<a href="' + a + '" >' + a + "</a>";
                 });
             }
 
-
+            /**
+             * Return the image correspondent to the sentiment of the text
+             * @param {array} data - data[1] and data[2] contains the sentiment
+             * @returns {String} - the path of the icon image
+             */
             function face(data) {
                 if (data[1] > 0) {
                     return 'images/grinning-face.png';
@@ -379,6 +272,11 @@
                 }
             }
 
+            /**
+             * Convert the timestamp into a date string
+             * @param {type} timestamp_ms
+             * @returns {String}
+             */
             function toDate(timestamp_ms) {
                 var e = new Date(parseInt(timestamp_ms)),
                         f = e.toDateString().substr(4),
@@ -388,10 +286,13 @@
             }
 
         </script>
+        
         <script>
+            //Script to manage the twitter data streaming
+            
             var channel_map = 'pubnub-mapbox' + getNonZeroRandomNumber();
-            var new_point = [];
-            var le;
+            var data_json_temp = [];
+            var length_query;
 
             var total = 0, positive = 0, negative = 0;
 
@@ -410,10 +311,26 @@
             var degree = 0;
             var marker;
             var markers_visible = new L.FeatureGroup();
+            
+            var point = {
+                    latlng: [37.370375, -97.756138]
+                };
 
-            //var re = /(:\)|:'\))/;
+                var pn_map = PUBNUB.init({
+                    publish_key: 'demo'
+                });
 
-            var e = eon.map({
+                var pn_tweet = PUBNUB.init({
+                    subscribe_key: 'sub-c-78806dd4-42a6-11e4-aed8-02ee2ddab7fe'
+                });
+
+                var data_json = JSON.parse(JSON.stringify(point));
+                var new_p;
+                total = 0, positive = 0, negative = 0;
+            
+            
+
+            var map = eon.map({
                 id: 'map',
                 mb_token: 'pk.eyJ1IjoiaWFuamVubmluZ3MiLCJhIjoiZExwb0p5WSJ9.XLi48h-NOyJOCJuu1-h-Jg',
                 mb_id: 'ianjennings.l896mh2e',
@@ -425,51 +342,31 @@
                             iconSize: [34, 34]
                         })
                     });
-
+                    
+                    // Html code to construct a nice popup
                     var popup = '<div class="middle"><font face="Arial" size="4">' + twemoji.parse(d(data[0])) + "</font></div>";
                     var p0 = '<blockquote class="h-entry">';
-                    var pn = '</blockquote>'
+                    var pn = '</blockquote>';
                     var p3 = '<a class="button" role="button" title="Follow on Twitter" href="" target="_blank"><img src="images/twitter-button.png"></a>';
                     var p1 = '<div class="text">' + popup + '</div><div class="timestamp">' + data[6] + '</div>';
-                    //var p2 = '<div class="header" style="background-image:url(' + data[4] + ')"><div class="name">'+data[5]+'</div><div class="screenname">'+data[3]+'</div></div>'
-                    var p4 = '<img src=' + data[4] + ' align="left">'
-                    var p2 = '<div class="header" style="height:60px">' + p4 + '<div class="name" align="right" size="3">' + data[5] + '</div><div class="screenname" align="right" size="3">' + data[3] + '</div></div>'
-
-                    //var s = document.querySelector(".header").style.backgroundImage = "url(" + data[4] + ")" ;
-
+                    var p4 = '<img src=' + data[4] + ' align="left">';
+                    var p2 = '<div class="header" style="height:60px">' + p4 + '<div class="name" align="right" size="3">' + data[5] + '</div><div class="screenname" align="right" size="3">' + data[3] + '</div></div>';
                     var p = p0 + p2 + p1 + pn;
                     markers_visible.addLayer(marker);
                     marker.bindPopup(p);
                     return marker;
                 },
-                connect: connect,
+                connect: connect_to_tweet,
                 options: {
                     zoomAnimation: false
                 }
             });
 
-            //e.addLayer(markers_visible);
-
-            function connect() {
-
-
-
-                var point = {
-                    latlng: [37.370375, -97.756138]
-                };
-
-                var pn = PUBNUB.init({
-                    publish_key: 'demo'
-                });
-
-                var pn_tweet = PUBNUB.init({
-                    subscribe_key: 'sub-c-78806dd4-42a6-11e4-aed8-02ee2ddab7fe'
-                });
-
-                var new_point3 = JSON.parse(JSON.stringify(point));
-                var new_p;
-                total = 0, positive = 0, negative = 0;
-
+            /**
+             * Manage each received tweet (data process and output results)
+             * @returns {undefined}
+             */
+            function connect_to_tweet() {
                 pn_tweet.subscribe({
                     channel: 'pubnub-twitter',
                     message: function (msg) {
@@ -484,12 +381,11 @@
                                 return val.indexOf("x") === -1 && val.length > 0;
                             });
                             var re_query = query_odd.join(" | ");
-                            le = new_point.length;
+                            length_query = data_json_temp.length;
                             var bp = Boolean(msg.text.match(re_pos));
                             var bn = Boolean(msg.text.match(re_neg));
                             var bl = Boolean(msg.text.match(re_love));
                             if (bp || bn || bl) {
-
                                 total++;
                                 if (bp || bl) {
                                     positive++;
@@ -500,63 +396,71 @@
                                 if (Boolean(msg.text.match(re_query))) {
                                     //if (msg.lang === 'it'){
                                     console.log("country " + msg.place.country + " message " + msg.text);
-                                    new_point = JSON.parse(JSON.stringify(new_point));
-                                    new_point[le] = {
+                                    data_json_temp = JSON.parse(JSON.stringify(data_json_temp));
+                                    data_json_temp[length_query] = {
                                         data: [msg.text, bp ? 1 : -1, bl ? 1 : -1, "@" + msg.user.screen_name, msg.user.profile_image_url, msg.user.name, toDate(msg.timestamp_ms)],
                                         latlng: [
                                             new_p[1],
                                             new_p[0]
                                         ]
                                     };
-                                    new_point3 = JSON.parse(JSON.stringify(new_point));
-
-                                    publish(new_point3);
-                                    //calculateCloud(processData(msg.text));
-                                    mycloud.stop().words(processData(msg.text)).start();
-                                    e.addLayer(markers_visible);
+                                    data_json = JSON.parse(JSON.stringify(data_json_temp));
+                                    
+                                    
+                                    publish(data_json);
+                                    
+                                    
+                                    //map.addLayer(markers_visible);
                                 }
-                                //}
                             }
                         }
                     }
                 });
 
 
+                /**
+                 * Update the Wordcloud. Create a marker on the map. Update the chart.
+                 * @param {array} data
+                 */
+                function publish(data) {
+                    
+                    mycloud.stop().words(processData(msg.text)).start();
 
-                function publish(nn) {
-                    pn.publish({
+                    pn_map.publish({
                         channel: channel_map,
-                        message: nn
+                        message: data
                     });
 
                     pub_chart.publish({
                         channel: channel_chart,
                         message: {
                             eon: {
-                                'data': Math.floor((positive/total)*100)
+                                'data': Math.floor((positive / total) * 100)
                             }
                         }
                     });
                 }
-            }
-            ;
+            };
 
 
-
-            function refresh_point() {
+            /**
+             * Refresh map, chart and wordcloud when a keyword is written
+             */
+            function refresh_marker() {
                 new_point = [];
                 wordCount = {};
                 total = 0, positive = 0, negative = 0;
-                d3.select("body").selectAll("svg").remove();
+                d3.select("#wordcloud").select("svg").remove();
                 createWord();
-                //e.removeLayer(markers_visible);
-                //e.remove();
+                //map.removeLayer(markers_visible);
+                //map.remove();
                 //markers_visible.clearLayers();
                 markers_visible.eachLayer(function (layer) {
                     //console.log('Hello');
-                    e.removeLayer(layer);
-                });
+                    map.removeLayer(layer);
 
+                });
+                markers_visible = new L.FeatureGroup();
             }
 
         </script>
