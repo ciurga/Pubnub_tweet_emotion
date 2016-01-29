@@ -424,7 +424,7 @@
                  */
                 function publish(data) {
                     
-                    mycloud.stop().words(processData(msg.text)).start();
+                    mycloud.stop().words(processData(data[0].data[0])).start();
 
                     pn_map.publish({
                         channel: channel_map,
